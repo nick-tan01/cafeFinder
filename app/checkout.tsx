@@ -1,9 +1,10 @@
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, TextInput, Platform } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useColorScheme } from 'react-native';
 import { useState } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Stack } from 'expo-router';
 
 interface OrderItem {
   id: string;
@@ -30,20 +31,6 @@ export default function CheckoutScreen() {
   const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const tax = subtotal * 0.1; // 10% tax
   const total = subtotal + tax;
-
-  const renderOrderItem = ({ item }: { item: OrderItem }) => (
-    <View style={styles.orderItem}>
-      <View style={styles.orderItemInfo}>
-        <Text style={[styles.orderItemName, { color: colorScheme === 'dark' ? '#fff' : '#000' }]}>
-          {item.name}
-        </Text>
-        <Text style={styles.orderItemQuantity}>x{item.quantity}</Text>
-      </View>
-      <Text style={styles.orderItemPrice}>
-        ${(item.price * item.quantity).toFixed(2)}
-      </Text>
-    </View>
-  );
 
   const processOrder = async () => {
     if (isProcessing) return;
@@ -99,6 +86,7 @@ export default function CheckoutScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colorScheme === 'dark' ? '#000' : '#fff' }]}>
+      <Stack.Screen options={{ headerShown: false }} />
       <ScrollView style={styles.scrollView}>
         <View style={styles.header}>
           <TouchableOpacity
@@ -116,7 +104,19 @@ export default function CheckoutScreen() {
           <Text style={[styles.sectionTitle, { color: colorScheme === 'dark' ? '#fff' : '#000' }]}>
             Order Summary
           </Text>
-          {cartItems.map((item) => renderOrderItem({ item }))}
+          {cartItems.map((item) => (
+            <View key={item.id} style={styles.orderItem}>
+              <View style={styles.orderItemInfo}>
+                <Text style={[styles.orderItemName, { color: colorScheme === 'dark' ? '#fff' : '#000' }]}>
+                  {item.name}
+                </Text>
+                <Text style={styles.orderItemQuantity}>x{item.quantity}</Text>
+              </View>
+              <Text style={styles.orderItemPrice}>
+                ${(item.price * item.quantity).toFixed(2)}
+              </Text>
+            </View>
+          ))}
           <View style={styles.divider} />
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Subtotal</Text>
@@ -183,6 +183,8 @@ export default function CheckoutScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#fff',
+    paddingTop: Platform.OS === 'ios' ? 70 : 50,
   },
   scrollView: {
     flex: 1,
@@ -190,16 +192,21 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    paddingHorizontal: 16,
+    paddingBottom: 20,
+    paddingTop: 10,
+    position: 'relative',
   },
   backButton: {
-    marginRight: 16,
+    position: 'absolute',
+    left: 16,
+    zIndex: 1,
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: '600',
+    flex: 1,
+    textAlign: 'center',
   },
   section: {
     padding: 16,
