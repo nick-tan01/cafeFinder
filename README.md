@@ -50,3 +50,6 @@ Join our community of developers creating universal apps.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
 # Test commit
 # Testing Git identity
+# Test Git Integration
+
+This line is added to test Git integration in Cursor.
