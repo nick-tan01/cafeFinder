@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { Amplify } from 'aws-amplify';
 import { signIn, signInWithRedirect, resetPassword, confirmResetPassword } from "aws-amplify/auth";
 
-import outputs from "./amplify_outputs.json";
+import outputs from "../../amplify_outputs.json";
 
 Amplify.configure(outputs);
 
