@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "cafe_complete",
-    "slug": "cafe_complete",
+    "slug": "coffeefinder",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -15,7 +15,9 @@
         "NSLocationWhenInUseUsageDescription": "We need your location to find cafes near you and show your position on the map.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "We need your location to find cafes near you and show your position on the map.",
         "NSLocationAlwaysUsageDescription": "We need your location to find cafes near you and show your position on the map.",
-        "UIBackgroundModes": ["location"]
+        "UIBackgroundModes": [
+          "location"
+        ]
       }
     },
     "android": {
@@ -25,8 +27,15 @@
       },
       "permissions": [
         "ACCESS_COARSE_LOCATION",
-        "ACCESS_FINE_LOCATION"
-      ]
+        "ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ],
+      "package": "com.anonymous.cafecomplete"
     },
     "web": {
       "bundler": "metro",
@@ -53,6 +62,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "4aa348f9-bd48-4d81-8cec-ce5ca35d79b6"
+      }
+    },
+    "owner": "nathanlee727"
   }
 }
