@@ -2,16 +2,50 @@ import { useState } from 'react';
 import { StyleSheet, View, Text, TextInput, FlatList, TouchableOpacity, Image } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useColorScheme } from 'react-native';
+import { useRouter } from 'expo-router';
+
+interface MenuItem {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  image?: string;
+  customization?: {
+    name: string;
+    options: { name: string; price: number }[];
+  }[];
+}
+
+interface Review {
+  id: string;
+  userId: string;
+  userName: string;
+  rating: number;
+  comment: string;
+  date: string;
+}
 
 interface Cafe {
   id: string;
   name: string;
   address: string;
   rating: number;
-  distance: string;
+  distance: number;
   image: string;
   isOpen: boolean;
   tags: string[];
+  menu: MenuItem[];
+  reviews: Review[];
+  openingHours: {
+    [key: string]: { open: string; close: string };
+  };
+  specialOffers: {
+    id: string;
+    title: string;
+    description: string;
+    validUntil: string;
+  }[];
 }
 
 // Temporary mock data for cafes
@@ -21,160 +55,265 @@ const MOCK_CAFES: Cafe[] = [
     name: 'The Coffee House',
     address: '123 Main St',
     rating: 4.5,
-    distance: '0.5 mi',
+    distance: 0.5,
     image: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=500',
     isOpen: true,
     tags: ['coffee', 'pastries', 'breakfast'],
+    menu: [
+      {
+        id: '1',
+        name: 'Espresso',
+        description: 'Rich and bold single shot espresso',
+        price: 3.50,
+        category: 'Coffee',
+        image: 'https://images.unsplash.com/photo-1610889556528-9a770e32642f?w=500',
+      },
+      {
+        id: '2',
+        name: 'Croissant',
+        description: 'Buttery, flaky French-style croissant',
+        price: 4.50,
+        category: 'Pastries',
+        image: 'https://images.unsplash.com/photo-1608198093002-ad4e005484ec?w=500',
+      },
+    ],
+    reviews: [
+      {
+        id: '1',
+        userId: 'user1',
+        userName: 'John Doe',
+        rating: 5,
+        comment: 'Best coffee in town!',
+        date: '2024-03-15',
+      }
+    ],
+    openingHours: {
+      Monday: { open: '07:00', close: '18:00' },
+      Tuesday: { open: '07:00', close: '18:00' },
+      Wednesday: { open: '07:00', close: '18:00' },
+      Thursday: { open: '07:00', close: '18:00' },
+      Friday: { open: '07:00', close: '19:00' },
+      Saturday: { open: '08:00', close: '19:00' },
+      Sunday: { open: '08:00', close: '17:00' },
+    },
+    specialOffers: [
+      {
+        id: '1',
+        title: 'Happy Hour',
+        description: '20% off all pastries from 2-4 PM',
+        validUntil: '2024-04-01',
+      }
+    ],
   },
   {
     id: '2',
     name: 'Bakery & Brew',
     address: '456 Oak Ave',
     rating: 4.8,
-    distance: '0.8 mi',
+    distance: 0.8,
     image: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=500',
     isOpen: true,
     tags: ['coffee', 'bakery', 'sandwiches'],
+    menu: [],
+    reviews: [],
+    openingHours: {},
+    specialOffers: [],
   },
   {
     id: '3',
     name: 'Morning Glory Cafe',
     address: '789 Maple Rd',
     rating: 4.3,
-    distance: '1.2 mi',
+    distance: 1.2,
     image: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=500',
     isOpen: true,
     tags: ['breakfast', 'coffee', 'pastries'],
+    menu: [],
+    reviews: [],
+    openingHours: {},
+    specialOffers: [],
   },
   {
     id: '4',
     name: 'Artisan Bakehouse',
     address: '321 Pine St',
     rating: 4.7,
-    distance: '1.5 mi',
+    distance: 1.5,
     image: 'https://images.unsplash.com/photo-1517433670267-08bbd4be890f?w=500',
     isOpen: true,
     tags: ['bakery', 'pastries', 'breakfast'],
+    menu: [],
+    reviews: [],
+    openingHours: {},
+    specialOffers: [],
   },
   {
     id: '5',
     name: 'The Sandwich Shop',
     address: '567 Cedar Ln',
     rating: 4.4,
-    distance: '0.9 mi',
+    distance: 0.9,
     image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=500',
     isOpen: true,
     tags: ['sandwiches', 'coffee'],
+    menu: [],
+    reviews: [],
+    openingHours: {},
+    specialOffers: [],
   },
   {
     id: '6',
     name: 'Sweet & Savory',
     address: '890 Elm St',
     rating: 4.6,
-    distance: '1.8 mi',
+    distance: 1.8,
     image: 'https://images.unsplash.com/photo-1517433367423-c7e5b0f35086?w=500',
     isOpen: true,
     tags: ['pastries', 'breakfast', 'sandwiches'],
+    menu: [],
+    reviews: [],
+    openingHours: {},
+    specialOffers: [],
   },
   {
     id: '7',
     name: 'Espresso Lane',
     address: '234 Birch Ave',
     rating: 4.9,
-    distance: '0.3 mi',
+    distance: 0.3,
     image: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=500',
     isOpen: false,
     tags: ['coffee', 'pastries'],
+    menu: [],
+    reviews: [],
+    openingHours: {},
+    specialOffers: [],
   },
   {
     id: '8',
     name: 'Breakfast Club',
     address: '678 Walnut St',
     rating: 4.2,
-    distance: '2.1 mi',
+    distance: 2.1,
     image: 'https://images.unsplash.com/photo-1550507992-eb63ffee0847?w=500',
     isOpen: true,
     tags: ['breakfast', 'coffee', 'sandwiches'],
+    menu: [],
+    reviews: [],
+    openingHours: {},
+    specialOffers: [],
   },
   {
     id: '9',
     name: 'French Corner',
     address: '123 Chestnut Ave',
     rating: 4.7,
-    distance: '1.1 mi',
+    distance: 1.1,
     image: 'https://images.unsplash.com/photo-1579697096985-41fe1430e5df?w=500',
     isOpen: true,
     tags: ['bakery', 'pastries', 'coffee'],
+    menu: [],
+    reviews: [],
+    openingHours: {},
+    specialOffers: [],
   },
   {
     id: '10',
     name: 'Rustic Loaf',
     address: '456 Magnolia Blvd',
     rating: 4.6,
-    distance: '1.7 mi',
+    distance: 1.7,
     image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500',
     isOpen: true,
     tags: ['bakery', 'breakfast', 'sandwiches'],
+    menu: [],
+    reviews: [],
+    openingHours: {},
+    specialOffers: [],
   },
   {
     id: '11',
     name: 'The Daily Grind',
     address: '789 Sycamore St',
     rating: 4.8,
-    distance: '0.6 mi',
+    distance: 0.6,
     image: 'https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=500',
     isOpen: true,
     tags: ['coffee', 'breakfast', 'pastries'],
+    menu: [],
+    reviews: [],
+    openingHours: {},
+    specialOffers: [],
   },
   {
     id: '12',
     name: 'Bagel Spot',
     address: '321 Willow Way',
     rating: 4.5,
-    distance: '1.3 mi',
+    distance: 1.3,
     image: 'https://images.unsplash.com/photo-1585088767768-94081fed9985?w=500',
     isOpen: true,
     tags: ['breakfast', 'sandwiches', 'bakery'],
+    menu: [],
+    reviews: [],
+    openingHours: {},
+    specialOffers: [],
   },
   {
     id: '13',
     name: 'Croissant Corner',
     address: '567 Poplar Place',
     rating: 4.9,
-    distance: '0.4 mi',
+    distance: 0.4,
     image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=500',
     isOpen: true,
     tags: ['pastries', 'bakery', 'coffee'],
+    menu: [],
+    reviews: [],
+    openingHours: {},
+    specialOffers: [],
   },
   {
     id: '14',
     name: 'Bean Scene',
     address: '890 Cedar Court',
     rating: 4.3,
-    distance: '1.6 mi',
+    distance: 1.6,
     image: 'https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=500',
     isOpen: false,
     tags: ['coffee', 'pastries', 'breakfast'],
+    menu: [],
+    reviews: [],
+    openingHours: {},
+    specialOffers: [],
   },
   {
     id: '15',
     name: 'Panini Press',
     address: '234 Maple Lane',
     rating: 4.4,
-    distance: '0.7 mi',
+    distance: 0.7,
     image: 'https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=500',
     isOpen: true,
     tags: ['sandwiches', 'coffee', 'breakfast'],
+    menu: [],
+    reviews: [],
+    openingHours: {},
+    specialOffers: [],
   },
   {
     id: '16',
     name: 'Sweet Tooth',
     address: '678 Oak Court',
     rating: 4.7,
-    distance: '1.4 mi',
+    distance: 1.4,
     image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=500',
     isOpen: true,
     tags: ['pastries', 'bakery', 'coffee'],
+    menu: [],
+    reviews: [],
+    openingHours: {},
+    specialOffers: [],
   }
 ];
 
@@ -188,6 +327,7 @@ const FILTER_TAGS = [
 ];
 
 export default function SearchScreen() {
+  const router = useRouter();
   const colorScheme = useColorScheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
@@ -203,7 +343,7 @@ export default function SearchScreen() {
     return matchesSearch && matchesFilter;
   }).sort((a, b) => {
     // Sort by distance
-    return parseFloat(a.distance.split(' ')[0]) - parseFloat(b.distance.split(' ')[0]);
+    return parseFloat(a.distance.toString()) - parseFloat(b.distance.toString());
   });
 
   const renderFilterTag = ({ item }: { item: typeof FILTER_TAGS[0] }) => (
@@ -252,6 +392,7 @@ export default function SearchScreen() {
         styles.cafeCard,
         { backgroundColor: colorScheme === 'dark' ? '#1c1c1e' : '#fff' }
       ]}
+      onPress={() => router.push(`/cafe/${item.id}`)}
     >
       <Image source={{ uri: item.image }} style={styles.cafeImage} />
       <View style={styles.cafeInfo}>
@@ -264,7 +405,7 @@ export default function SearchScreen() {
             <FontAwesome name="star" size={16} color="#FFD700" />
             <Text style={styles.rating}>{item.rating}</Text>
           </View>
-          <Text style={styles.distance}>{item.distance}</Text>
+          <Text style={styles.distance}>{item.distance.toString()} mi</Text>
           <View style={[styles.openStatus, { backgroundColor: item.isOpen ? '#4CAF50' : '#F44336' }]}>
             <Text style={styles.openStatusText}>{item.isOpen ? 'Open' : 'Closed'}</Text>
           </View>

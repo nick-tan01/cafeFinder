@@ -356,19 +356,19 @@ export default function CafeScreen() {
           
           <View style={styles.modalButtons}>
             <TouchableOpacity
-              style={[styles.modalActionButton, styles.cancelButton]}
+              style={[styles.modalActionButton]}
               onPress={() => {
                 setSelectedItem(null);
                 setCustomizations({});
               }}
             >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
+              <Text style={styles.modalActionButtonText}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.modalActionButton, styles.addButton]}
+              style={[styles.modalActionButton, { backgroundColor: '#007AFF' }]}
               onPress={handleAddCustomizedItem}
             >
-              <Text style={styles.addButtonText}>Add to Cart</Text>
+              <Text style={[styles.modalActionButtonText, { color: '#fff' }]}>Add to Cart</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -829,11 +829,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#007AFF',
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   addButtonText: {
     color: '#fff',
-    fontWeight: 'bold',
+    fontSize: 14,
+    fontWeight: '500',
   },
   quantityControls: {
     flexDirection: 'row',
@@ -951,21 +954,25 @@ const styles = StyleSheet.create({
   },
   modalButtons: {
     flexDirection: 'row',
-    marginTop: 20,
+    justifyContent: 'space-between',
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
   },
   modalActionButton: {
     flex: 1,
-    padding: 12,
-    borderRadius: 8,
+    paddingVertical: 14,
+    borderRadius: 25,
     alignItems: 'center',
+    justifyContent: 'center',
     marginHorizontal: 8,
+    backgroundColor: '#f1f1f1',
   },
-  cancelButton: {
-    backgroundColor: '#f5f5f5',
-  },
-  cancelButtonText: {
+  modalActionButtonText: {
+    color: '#007AFF',
     fontSize: 16,
-    color: '#666',
+    fontWeight: '600',
+    textAlign: 'center',
   },
   reviewsHeader: {
     flexDirection: 'row',
