@@ -1,8 +1,10 @@
 import { StyleSheet, View, Text, TouchableOpacity, TextInput } from 'react-native';
-import { useColorScheme } from 'react-native';
+import { useColorScheme, Alert } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useState } from 'react';
+
+import { supabase } from '../../lib/supabase';
 
 export default function SignUpScreen() {
   const colorScheme = useColorScheme();
@@ -11,11 +13,28 @@ export default function SignUpScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmCode, setConfirmCode] = useState('');
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSignUp = () => {
-    // Here we'll add actual sign up logic
-    router.replace('/(tabs)');
-  };
+
+  async function handleSignUp() {
+    setLoading(true)
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.signUp({
+      email: email,
+      password: password,
+    })
+    if (error) Alert.alert(error.message)
+    if (!session) Alert.alert('Please check your inbox for email verification!')
+    setLoading(false)
+  }
+// Confirm Email
+  
+  
 
   return (
     <View style={[
@@ -91,14 +110,36 @@ export default function SignUpScreen() {
               secureTextEntry
             />
           </View>
+          {showConfirm && (
+            <>
+              <View style={[styles.inputContainer, { backgroundColor: colorScheme === 'dark' ? '#1c1c1e' : '#f5f5f5' }]}>
+                <Text style={styles.label}>Confirmation Code</Text>
+                <TextInput
+                  style={[styles.input, { color: colorScheme === 'dark' ? '#fff' : '#000' }]}
+                  placeholder="Enter code sent to email"
+                  placeholderTextColor="#666"
+                  value={confirmCode}
+                  onChangeText={setConfirmCode}
+                  keyboardType="numeric"
+                />
+              </View>
 
-          <TouchableOpacity 
-            style={[styles.signUpButton, !name || !email || !password ? styles.signUpButtonDisabled : null]}
-            onPress={handleSignUp}
-            disabled={!name || !email || !password}
-          >
-            <Text style={styles.signUpButtonText}>Create Account</Text>
-          </TouchableOpacity>
+              <TouchableOpacity style={styles.signUpButton}>
+                <Text style={styles.signUpButtonText}>Confirm Account</Text>
+              </TouchableOpacity>
+            </>
+          )}
+
+          {!showConfirm && (
+            <TouchableOpacity
+              style={[styles.signUpButton, !name || !email || !password ? styles.signUpButtonDisabled : null]}
+              onPress={handleSignUp}
+              disabled={!name || !email || !password}
+            >
+              <Text style={styles.signUpButtonText}>Create Account</Text>
+            </TouchableOpacity>
+          )}
+
 
           <View style={styles.signInContainer}>
             <Text style={styles.signInText}>Already have an account? </Text>
@@ -106,6 +147,8 @@ export default function SignUpScreen() {
               <Text style={styles.signInLink}>Sign In</Text>
             </TouchableOpacity>
           </View>
+          {error ? <Text style={{ color: 'red', marginTop: 8 }}>{error}</Text> : null}
+          {loading && <Text style={{ marginTop: 8 }}>Processing...</Text>}
         </View>
       </View>
     </View>
