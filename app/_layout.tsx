@@ -1,4 +1,3 @@
-
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack, useRouter  } from 'expo-router';
@@ -70,17 +69,10 @@ export default function RootLayout() {
             backgroundColor: colorScheme === 'dark' ? '#000' : '#fff',
           },
           headerTintColor: colorScheme === 'dark' ? '#fff' : '#000',
-          headerTitleStyle: {
-            fontWeight: '600',
-          },
-          headerBackTitle: '',
         }}
       >
-        {session && session.user ? (
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        ) : (
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        )}
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

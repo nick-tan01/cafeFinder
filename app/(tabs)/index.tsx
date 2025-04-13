@@ -188,11 +188,11 @@ export default function ExploreScreen() {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={[styles.container, { backgroundColor: colorScheme === 'dark' ? '#000' : '#fff' }]}>
-        <View style={styles.header}>
-          <Text style={[styles.headerTitle, { color: colorScheme === 'dark' ? '#fff' : '#000' }]}>Explore Cafes</Text>
+        <View style={styles.filtersContainer}>
           {errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
-          <TouchableOpacity style={{ marginTop: 8 }} onPress={() => setShowFilterModal(true)}>
-            <Text style={{ color: '#007AFF', fontWeight: '600' }}>Filters</Text>
+          <TouchableOpacity style={styles.filterButton} onPress={() => setShowFilterModal(true)}>
+            <FontAwesome name="filter" size={16} color="#007AFF" />
+            <Text style={styles.filterButtonText}>Filters</Text>
           </TouchableOpacity>
         </View>
 
@@ -303,20 +303,28 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
+  filtersContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 8,
   },
   errorText: {
     color: '#F44336',
     fontSize: 14,
-    marginTop: 8,
+    marginRight: 16,
+  },
+  filterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
+    borderWidth: 1,
+    borderColor: '#007AFF',
+    borderRadius: 8,
+  },
+  filterButtonText: {
+    color: '#007AFF',
+    fontWeight: '600',
+    marginLeft: 8,
   },
   viewToggle: {
     flexDirection: 'row',
