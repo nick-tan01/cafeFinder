@@ -1,11 +1,17 @@
-import { StyleSheet, View, Text, TouchableOpacity,ActivityIndicator, TextInput } from 'react-native';
-
-import { Alert, useColorScheme, AppState  } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ActivityIndicator, TextInput } from 'react-native';
+import { Alert, useColorScheme, AppState } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { AntDesign } from '@expo/vector-icons';
+import * as WebBrowser from 'expo-web-browser';
+import * as Google from 'expo-auth-session/providers/google';
+import { TokenResponse } from 'expo-auth-session';
 
 import { supabase } from '../../lib/supabase';
+
+// Initialize WebBrowser for OAuth
+WebBrowser.maybeCompleteAuthSession();
 
 AppState.addEventListener('change', (state) => {
   if (state === 'active') {
@@ -22,7 +28,34 @@ export default function SignInScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    iosClientId: '826580028121-ajld04ru0ucgn6d20ofa78dpicdkp7r4.apps.googleusercontent.com',
+    webClientId: '826580028121-9m72cato1ca4j6m4gmgv75e9m90c0cp3.apps.googleusercontent.com',
+    redirectUri: 'https://auth.expo.io/@nathanlee727/cafe_complete',
+  });
+
+  useEffect(() => {
+    if (response?.type === 'success') {
+      console.log('Sign in successful');
+      router.replace('/(tabs)');
+    } else if (response?.type === 'error') {
+      console.error('Sign in error:', response.error);
+      Alert.alert('Error', 'Could not sign in with Google');
+    }
+  }, [response]);
+
+  async function handleGoogleSignIn() {
+    try {
+      setLoading(true);
+      await promptAsync();
+    } catch (error) {
+      console.error('Google Sign In Error:', error);
+      Alert.alert('Error', 'Could not sign in with Google');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function handleSignIn() {
     setLoading(true)
@@ -33,10 +66,6 @@ export default function SignInScreen() {
     if (error) Alert.alert(error.message)
     setLoading(false)
   }
-
-  //Sign in with Google
-
-  //Reset Password
 
   return (
     <View style={[
@@ -67,6 +96,23 @@ export default function SignInScreen() {
         </Text>
 
         <View style={styles.form}>
+          <TouchableOpacity 
+            style={styles.googleButton}
+            onPress={handleGoogleSignIn}
+            disabled={loading}
+          >
+            <View style={styles.googleButtonContent}>
+              <AntDesign name="google" size={20} color="#4285F4" style={styles.googleIcon} />
+              <Text style={styles.googleButtonText}>Sign in with Google</Text>
+            </View>
+          </TouchableOpacity>
+
+          <View style={styles.orContainer}>
+            <View style={styles.orLine} />
+            <Text style={styles.orText}>or</Text>
+            <View style={styles.orLine} />
+          </View>
+
           <View style={[
             styles.inputContainer,
             { backgroundColor: colorScheme === 'dark' ? '#1c1c1e' : '#f5f5f5' }
@@ -101,20 +147,13 @@ export default function SignInScreen() {
           <TouchableOpacity style={styles.forgotPassword}>
             <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
           </TouchableOpacity>
-        
 
           <TouchableOpacity 
             style={[styles.signInButton, !email || !password ? styles.signInButtonDisabled : null]}
             onPress={handleSignIn}
-            disabled={!email || !password}
+            disabled={!email || !password || loading}
           >
-            <Text style={styles.signInButtonText}>Sign In</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[styles.signInButton, { backgroundColor: '#DB4437' }]}
-          >
-            <Text style={styles.signInButtonText}>Sign In with Google</Text>
+            <Text style={styles.signInButtonText}>Sign In with Email</Text>
           </TouchableOpacity>
 
           <View style={styles.signUpContainer}>
@@ -125,7 +164,6 @@ export default function SignInScreen() {
           </View>
 
           {loading && <ActivityIndicator style={{ marginTop: 8 }} />}
-
         </View>
       </View>
     </View>
@@ -201,5 +239,48 @@ const styles = StyleSheet.create({
     color: '#007AFF',
     fontSize: 14,
     fontWeight: '500',
+  },
+  googleButton: {
+    backgroundColor: '#fff',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#dadce0',
+    marginTop: 16,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1,
+  },
+  googleButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  googleIcon: {
+    marginRight: 12,
+  },
+  googleButtonText: {
+    color: '#3c4043',
+    fontSize: 14,
+    fontWeight: '500',
+    letterSpacing: 0.25,
+  },
+  orContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  orLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#dadce0',
+  },
+  orText: {
+    color: '#666',
+    fontSize: 14,
+    marginHorizontal: 16,
   },
 }); 
